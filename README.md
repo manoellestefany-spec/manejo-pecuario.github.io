@@ -1,1 +1,0 @@
-# manejo-pecuario.github.io
