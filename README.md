@@ -9,4 +9,5 @@ Este bancos de dados visa centralizar as informações do rebanho, permitindo ao
 2.Um animal pertence a único lote por vez (ex:" Lote Engorda 1", "Lote Matrizes"), mas um lote pode ter vários animais.  
 3.Um animal pode receber várias vacinas ao longo da vida, e uma mesma vacina pode ser aplicada em diversos animais.  
 4.Cada aplicação de vacina deve registrar a data e a dose aplicada.  
-5.Um animal passa por diversas pesagens para acompanhamento de desenvolvimento.
+5.Um animal passa por diversas pesagens para acompanhamento de desenvolvimento.  
+6.Cada animal deve ter seu status registrado(em criação, vendido ou óbito). Em caso de venda, devem-se registrar a data, o peso final e o valor da transação; em decorrência de óbito, devem-se registrar a data e o motivo da perda.
