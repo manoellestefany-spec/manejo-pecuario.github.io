@@ -59,6 +59,6 @@
 
 
 ## 4. Diagrama Entidade e Relacionamento (DER)  
-<img width="1021" height="479" alt="image" src="https://github.com/user-attachments/assets/5409a857-5d0d-4d44-a58e-d4800d274808" />
+<img width="1021" height="479" alt="image" src="https://drive.google.com/file/d/1X9kOUS-6xi21KkzDggo0bXkhUzCAlbe3/view?usp=sharing" />
 
 
