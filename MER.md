@@ -60,9 +60,10 @@
 
 ## 4. Diagrama Entidade e Relacionamento (DER) 
 
-## Diagrama
 
-![Diagrama MER](docs/diagrama-mer.drawio.svg)
+
+
+<img width="1329" height="896" alt="image" src="https://github.com/user-attachments/assets/48821df6-e3cd-4a3a-ac0d-74255e97e954" />
 
 
 
