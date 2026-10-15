@@ -1,12 +1,14 @@
 # Modelo de Entidade e Relacionamento (MER) - Manejo Pecuário
 
 ## 1. Entidades
-
+* **Pasto:** Representa a área física da fazenda onde os lotes de animais são alocados.
 * **Animal:** Representa cada bovino individualmente na propriedade.
-* **Lote:** Representa a área ou agrupamento de manejo onde o animal está alocado.
+* **Lote:** Representa o agrupamento de manejo onde o animal está alocado.
 * **Vacina:** Representa o tipo de vacina/medicamento disponível no catálogo da fazenda.
 * **Pesagem:** Registra a evolução do peso do animal ao longo do tempo.
-* **Aplicacao_Vacina:** Registra os eventos de imunização aplicados a cada animal.  
+* **Aplicação_Vacina:** Registra os eventos de imunização aplicados a cada animal.
+* **Venda:** Registra a transação comercial ou nota de venda referente à saida de um grupo de animais da propriedade.
+* **Obito:** Registra a ocorrência e causa da morte de um animal especifico.
 
 ## 2. Relacionamentos e Cardinalidades
 
