@@ -93,5 +93,4 @@ CREATE TABLE IF NOT EXISTS obito (
 );
 
 ## imagem do diagrama
-<img width="999" height="796" alt="image" src="https://github.com/user-attachments/assets/bb69ed15-3851-4682-965c-ea3badcf3a4b" />
-
+<img width="912" height="723" alt="image" src="https://github.com/user-attachments/assets/11383346-b844-437b-84df-42c7016feb99" />
