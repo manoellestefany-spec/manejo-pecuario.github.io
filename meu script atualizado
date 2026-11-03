@@ -1,0 +1,310 @@
+
+-- =========================================================================
+-- PROJETO PRÁTICO: SISTEMA DE MANEJO PECUÁRIO
+-- Aplicação das Formas Normais (1FN, 2FN e 3FN) e Mapeamento DER -> SQL
+-- Contexto: Gestão de Pastos, Lotes, Animais, Pesagens, Vacinas e Vendas
+-- =========================================================================
+
+-- Limpa a base de dados caso ela já exista para evitar erros ao recriar
+DROP DATABASE IF EXISTS ManejoPecuarioDB;
+
+-- Criação e seleção do banco de dados oficial do sistema
+CREATE DATABASE ManejoPecuarioDB;
+USE ManejoPecuarioDB;
+
+
+-- =========================================================================
+-- CONCEITO CENTRAL DE NORMALIZAÇÃO
+-- "Garantir a integridade dos dados sem redundâncias ou inconsistências!"
+-- =========================================================================
+
+
+-- =========================================================================
+-- 1. TABELA PASTO (Entidade Pai do Lote - Relacionamento 1:N)
+-- =========================================================================
+CREATE TABLE Pasto (
+  -- idPasto: Chave Primária Única do Pasto
+  idPasto INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+
+  -- Atributos simples para descrever o local físico da propriedade
+  nomePasto VARCHAR(100) NOT NULL,
+  areaHectares DECIMAL(10,2) NOT NULL,
+  tipoCapim VARCHAR(50) NOT NULL
+);
+
+
+-- =========================================================================
+-- 2. TABELA LOTE (Aplicando 3FN - Dependência Transitiva)
+--
+-- APLICAÇÃO DA 3ª FORMA NORMAL (3FN):
+-- 1. O Lote está vinculado a um Pasto através da Chave Estrangeira 'idPasto'.
+-- 2. Não colocamos dados do Pasto (como tipoCapim ou areaHectares) aqui dentro!
+--    Isso evita repetir informações do pasto a cada novo lote cadastrado.
+-- =========================================================================
+CREATE TABLE Lote (
+  idLote INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  nomeLote VARCHAR(100) NOT NULL,
+  capacidadeMaxima INT UNSIGNED NOT NULL,
+
+  -- Chave Estrangeira apontando para o Pasto onde o lote está alocado
+  idPasto INT UNSIGNED NOT NULL,
+
+  CONSTRAINT fk_lote_pasto
+    FOREIGN KEY (idPasto)
+    REFERENCES Pasto(idPasto)
+    ON DELETE RESTRICT
+);
+
+
+-- =========================================================================
+-- 3. TABELA VENDA (Tabela Independente de Transações Comerciais)
+-- =========================================================================
+CREATE TABLE Venda (
+  idVenda INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  dataVenda DATE NOT NULL,
+  comprador VARCHAR(150) NOT NULL,
+  valorTotalTransacao DECIMAL(12,2) NOT NULL
+);
+
+
+-- =========================================================================
+-- 4. TABELA ANIMAL (Aplicando 1FN e 3FN)
+--
+-- APLICAÇÃO DA 1ª FORMA NORMAL (1FN - ATOMICIDADE):
+-- 1. O brinco de identificação é único por cabeça de gado.
+-- 2. Históricos como 'Pesagens' e 'Aplicações de Vacina' foram REMOVIDOS desta 
+--    tabela (pois o animal pesa várias vezes e toma várias vacinas ao longo do tempo).
+--    Se ficassem aqui, violariam a 1FN criando campos repetidos ou listas na mesma célula.
+--
+-- APLICAÇÃO DA 3ª FORMA NORMAL (3FN):
+-- 1. O animal guarda apenas 'idLote' e 'idVenda' (que pode ser NULO enquanto não vendido).
+-- 2. O nome do lote e os dados do comprador NÃO ficam nesta tabela.
+-- =========================================================================
+CREATE TABLE Animal (
+  idAnimal INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  brincoIdentificacao VARCHAR(50) NOT NULL UNIQUE,
+  dataNascimento DATE NOT NULL,
+  sexo CHAR(1) NOT NULL,
+  raca VARCHAR(50) NOT NULL,
+  statusAnimal VARCHAR(20) NOT NULL DEFAULT 'Ativo', -- Ex: Ativo, Vendido, Morto
+
+  -- Relacionamento 1:N com Lote (Obrigatório)
+  idLote INT UNSIGNED NOT NULL,
+
+  -- Relacionamento 1:N com Venda (Opcional - nulo enquanto for do rebanho)
+  idVenda INT UNSIGNED NULL,
+
+  CONSTRAINT fk_animal_lote
+    FOREIGN KEY (idLote)
+    REFERENCES Lote(idLote),
+
+  CONSTRAINT fk_animal_venda
+    FOREIGN KEY (idVenda)
+    REFERENCES Venda(idVenda)
+);
+
+
+-- =========================================================================
+-- 5. TABELA PESAGEM (Solução da 1FN para Histórico do Animal)
+--
+-- CONCEITO:
+-- Um mesmo animal acumula várias pesagens na sua engorda. Para não violar a 1FN,
+-- isolamos o peso e a data nesta tabela ligada ao idAnimal via FK.
+-- =========================================================================
+CREATE TABLE Pesagem (
+  idPesagem INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  dataPesagem DATE NOT NULL,
+  pesoKg DECIMAL(6,2) NOT NULL,
+  
+  -- FK identificando a qual animal pertence esta medição
+  idAnimal INT UNSIGNED NOT NULL,
+
+  CONSTRAINT fk_pesagem_animal
+    FOREIGN KEY (idAnimal)
+    REFERENCES Animal(idAnimal)
+    ON DELETE CASCADE
+);
+
+
+-- =========================================================================
+-- 6. TABELA VACINA (Catálogo de Medicamentos da Fazenda)
+-- =========================================================================
+CREATE TABLE Vacina (
+  idVacina INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  nomeVacina VARCHAR(100) NOT NULL,
+  fabricante VARCHAR(100) NOT NULL,
+  periodoValidadeDias INT UNSIGNED NOT NULL
+);
+
+
+-- =========================================================================
+-- 7. TABELA APLICACAO_VACINA (Aplicando a 2ª FORMA NORMAL - 2FN)
+--
+-- CONCEITO: Relacionamento N:N (Muitos para Muitos) entre Animal e Vacina.
+-- Um animal toma várias vacinas e uma vacina é usada em vários animais.
+--
+-- APLICAÇÃO DA 2ª FORMA NORMAL (2FN - DEPENDÊNCIA FUNCIONAL TOTAL):
+-- Regra: A aplicação precisa ter os atributos que dependem desse evento específico!
+--
+-- FORMA CORRETA (2FN APLICADA):
+-- 1. 'dataAplicacao' e 'doseMl' pertencem exclusivamente ao momento da aplicação.
+-- 2. O nome da vacina fica isolado na tabela Vacina, e os dados do boi ficam na tabela Animal.
+-- =========================================================================
+CREATE TABLE AplicacaoVacina (
+  idAplicacao INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  dataAplicacao DATE NOT NULL,
+  doseMl DECIMAL(5,2) NOT NULL,
+
+  -- Chaves Estrangeiras do evento de imunização
+  idAnimal INT UNSIGNED NOT NULL,
+  idVacina INT UNSIGNED NOT NULL,
+
+  CONSTRAINT fk_aplicacao_animal
+    FOREIGN KEY (idAnimal)
+    REFERENCES Animal(idAnimal)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_aplicacao_vacina
+    FOREIGN KEY (idVacina)
+    REFERENCES Vacina(idVacina)
+);
+
+
+-- =========================================================================
+-- 8. TABELA OBITO (Relacionamento 1:1 - Registros Especiais)
+--
+-- CONCEITO:
+-- Nem todo animal morre na fazenda (muitos são vendidos). 
+-- Um animal pode registrar no máximo 1 óbito. Para isso usamos UNIQUE na FK!
+-- =========================================================================
+CREATE TABLE Obito (
+  idObito INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  dataObito DATE NOT NULL,
+  motivo VARCHAR(255) NOT NULL,
+
+  -- UNIQUE garante a restrição de que 1 animal só tem 1 óbito registrado (1:1)
+  idAnimal INT UNSIGNED NOT NULL UNIQUE,
+
+  CONSTRAINT fk_obito_animal
+    FOREIGN KEY (idAnimal)
+    REFERENCES Animal(idAnimal)
+    ON DELETE CASCADE
+);
+
+
+-- =========================================================================
+-- 9. INSERÇÃO DE DADOS (DML) - POVOAMENTO ESTRATÉGICO
+-- =========================================================================
+
+-- Inserindo Pastos (Tabela Pai)
+INSERT INTO Pasto (nomePasto, areaHectares, tipoCapim) VALUES
+('Pasto do Córrego', 45.50, 'Braquiara'),
+('Pasto da Serra', 30.00, 'Mombaça'),
+('Pasto Quarentena', 10.00,  'Massai');
+
+-- Inserindo Lotes (3FN: Associados ao pasto via idPasto)
+INSERT INTO Lote (nomeLote, capacidadeMaxima, idPasto) VALUES
+('Lote Bezerros Desmamados', 30, 10),
+('Lote Matrizes Nelore', 50, 20),
+('Lote Garrotes Engorda', 40, 15),
+('Lote Quarentena/Observação', 15, 20); -- Lote que ficará sem animais para testes
+
+-- Inserindo Vacinas no catálogo
+INSERT INTO Vacina (nomeVacina, fabricante, periodoValidadeDias) VALUES
+('Aftosa Ouro', 'Ourofino', 180),
+('RaivaVax', 'Zoetis', 365),
+('Vencofos', 'MSD Saúde Animal', 180);
+
+-- Inserindo Vendas
+INSERT INTO Venda (dataVenda, comprador, valorTotalTransacao) VALUES
+('2026-02-15', 'Frigorífico Bateias', 15000.00);
+
+-- Inserindo Animais (1FN: Atributos atômicos e chaves estrangeiras)
+INSERT INTO Animal (brincoIdentificacao, dataNascimento, sexo, raca, statusAnimal, idLote, idVenda) VALUES
+('BOI-001', '2024-01-10', 'M', 'Nelore pintado', 'Ativo', 1, NULL),
+('BOI-002', '2024-01-15', 'F', 'Nelore', 'Ativo', 1, NULL),
+('BOI-003', '2023-05-20', 'F', 'Nelore Pintado', 'Ativo', 2, NULL),
+('BOI-004', '2023-06-11', 'M', 'Nelore', 'Vendido', 3, 1), -- Animal vendido no lote de venda 1
+('BOI-005', '2023-02-01', 'M', 'Nelore ', 'Morto', 3, NULL);
+
+-- Inserindo Histórico de Pesagens (1FN)
+INSERT INTO Pesagem (dataPesagem, pesoKg, idAnimal) VALUES
+('2024-06-01', 180.50, 1),
+('2024-09-01', 230.00, 1), -- Segunda pesagem do BOI-001
+('2024-06-01', 175.00, 2),
+('2024-08-10', 410.00, 4);
+
+-- Inserindo Aplicações de Vacina (2FN: Registros N:M)
+INSERT INTO AplicacaoVacina (dataAplicacao, doseMl, idAnimal, idVacina) VALUES
+('2024-05-10', 5.00, 1, 1), -- BOI-001 tomou Aftosa
+('2024-05-10', 2.00, 1, 2), -- BOI-001 tomou Raiva
+('2024-05-10', 5.00, 2, 1); -- BOI-002 tomou Aftosa
+
+-- Inserindo Registro de Óbito (1:1)
+INSERT INTO Obito (dataObito, motivo, idAnimal) VALUES
+('2024-11-01', 'doença:Carbúnculo Sintomático', 5);
+
+
+-- =========================================================================
+-- 10. CONSULTAS DEMONSTRATIVAS DAS FORMAS NORMAIS (DQL)
+-- =========================================================================
+
+-- -------------------------------------------------------------------------
+-- DEMONSTRAÇÃO 1: RECONSTRUÇÃO DA 3FN (JOIN entre Pasto, Lote e Animal)
+-- Como não duplicamos os dados do Pasto nem do Lote na tabela Animal,
+-- usamos JOIN para trazer o relatório completo!
+-- -------------------------------------------------------------------------
+SELECT 
+    a.brincoIdentificacao AS 'Brinco',
+    a.raca AS 'Raça',
+    l.nomeLote AS 'Lote Pertencente',
+    p.nomePasto AS 'Pasto Alocado',
+    p.tipoCapim AS 'Capim do Pasto'
+FROM Animal a
+INNER JOIN Lote l ON a.idLote = l.idLote
+INNER JOIN Pasto p ON l.idPasto = p.idPasto
+WHERE a.statusAnimal = 'Ativo'
+ORDER BY a.brincoIdentificacao;
+
+
+-- -------------------------------------------------------------------------
+-- DEMONSTRAÇÃO 2: CONSULTA 1FN (Histórico de Pesagens por Animal)
+-- Exibe a evolução do peso sem misturar múltiplos valores na tabela Animal.
+-- -------------------------------------------------------------------------
+SELECT 
+    a.brincoIdentificacao AS 'Brinco',
+    pes.dataPesagem AS 'Data da Pesagem',
+    pes.pesoKg AS 'Peso (Kg)'
+FROM Animal a
+INNER JOIN Pesagem pes ON a.idAnimal = pes.idAnimal
+WHERE a.idAnimal = 1
+ORDER BY pes.dataPesagem ASC;
+
+
+-- -------------------------------------------------------------------------
+-- DEMONSTRAÇÃO 3: RECONSTRUÇÃO DA 2FN (Aplicações de Vacina)
+-- Cruza a tabela associativa AplicacaoVacina trazendo os dados do boi e da vacina.
+-- -------------------------------------------------------------------------
+SELECT 
+    a.brincoIdentificacao AS 'Brinco do Animal',
+    v.nomeVacina AS 'Vacina Aplicada',
+    v.fabricante AS 'Fabricante',
+    ap.doseMl AS 'Dose (ml)',
+    ap.dataAplicacao AS 'Data de Aplicação'
+FROM AplicacaoVacina ap
+INNER JOIN Animal a ON ap.idAnimal = a.idAnimal
+INNER JOIN Vacina v ON ap.idVacina = v.idVacina
+ORDER BY ap.dataAplicacao DESC;
+
+
+-- -------------------------------------------------------------------------
+-- DEMONSTRAÇÃO 4: LEFT JOIN E AGREGAÇÃO (Contagem por Lote incluindo Vazio)
+-- Mostra a contagem de animais por lote, identificando inclusive o lote sem animais.
+-- -------------------------------------------------------------------------
+SELECT 
+    l.nomeLote AS 'Nome do Lote',
+    COUNT(a.idAnimal) AS 'Total de Animais'
+FROM Lote l
+LEFT JOIN Animal a ON l.idLote = a.idLote
+GROUP BY l.idLote, l.nomeLote
+ORDER BY `Total de Animais` DESC;
