@@ -28,6 +28,8 @@
 * **Modelo lógico/ físico (EER Workbench):** <img width="942" height="736" alt="Captura de tela 2026-11-03 114306" src="https://github.com/user-attachments/assets/5c4ca68b-5361-4a5f-8e01-13ad09cdd1db" />
   
 ## Scripts SQL 
-* **Estrutura do Banco(DDL):**
+* **Estrutura do Banco(DDL):** [script DDL.sql](https://github.com/user-attachments/files/35293647/script.DDL.sql)
+
 * **Povoamento de Dados por Cenários (DML):** 
+[script DML.sql](https://github.com/user-attachments/files/35293931/script.DML.sql)
 
