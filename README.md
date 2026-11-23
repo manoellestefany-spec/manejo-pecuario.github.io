@@ -1,97 +1,33 @@
 # Sistema de Manejo Pecuário  
 
 ## Descrição de Minimundo  
-Pequenas e médias propriedades rurais enfrentam dificuldades para controlar o histórico de saúde,vacinação  
-rastreabilidade e ganho de peso do seu rebanho bovino. A ausência de um sistema centralizado resulta em perda de prazos de vacinação, dificuldades na identificação do histórico genético e falta de controle sobre os custos de manejo.
-Este bancos de dados visa centralizar as informações do rebanho, permitindo ao produtor registrar cada animal, associá-lo a um lote específico na fazenda, acompanhar as vacinas aplicadas e registrar as pesagens ao longo do tempo.  
+* Pequenas e médias propriedades rurais dedicadas à pecuária de corte e cria enfrentam grandes desafios operacionais ao gerenciar seu rebanho de forma manual, por meio de cadernos de campo ou planilhas isoladas. A ausência de  um sistema centralizado e confiável provoca falhas críticas no dia a dia da fazenda: perda de prazos no calendário sanitário obrigatório,superlotação de pastagens(o que degrada o solo e reduz o ganho de peso do gado), dificuldade na rastreabilidade individual de cada animal, desconhecimento sobre a real conversão alimentar e falta  de precisão no controle financeiro das vendas e perdas do plantel.
+  
+   Para superar essas dificuldades, o Sistema de Manejo Pecuário foi projetado para informatizar e integrar toda a gestão zootécnica, sanitária e comercial da propriedade rural. O funcionamento do sistema abrange desde a organização física da fazenda até a saída final dos animais:
+
+ * Divisão Territorial e Lotação (Pastos e Lotes): A propriedade é dividida em áreas físicas chamadas Pastos (invernadas ou piquetes), onde são controlados o nome da área, o tamanho em hectares e o tipo de capim cultivado (como Brachiaria, Mombaça ou Tifton). Para otimizar o manejo nutricional e reprodutivo, o rebanho é agrupado em Lotes específicos por categoria ou objetivo produtivo (ex.: Bezerros Desmamados, Matrizes, Garrotes em Engorda ou Isolamento Sanitário), respeitando a capacidade máxima de cada lote e sua alocação em um determinado pasto.
+
+* Rastreabilidade Individual (Animais): Cada bovino que nasce ou ingressa na fazenda recebe um brinco de identificação único e intransferível. O sistema armazena sua ficha completa contendo data de nascimento, sexo, raça, lote atual e status dentro da propriedade (Ativo, Vendido ou Morto), garantindo histórico individualizado durante todo o ciclo produtivo.
+
+* Controle Sanitário e Imunização (Vacinas e Aplicações): A fazenda mantém um catálogo atualizado de Vacinas e medicamentos veterinários, registrando o nome comercial, o fabricante e o período de validade em dias. Sempre que ocorre uma campanha de vacinação ou tratamento preventivo, o sistema registra o evento de Aplicação de Vacina, vinculando o animal, a vacina utilizada, a data exata da aplicação e a dosagem administrada em mililitros (ml), evitando tanto a duplicidade de doses quanto o esquecimento de animais.
+
+* Acompanhamento Zootécnico (Pesagens): Periodicamente, os animais passam pelo tronco de contenção e balança digital. Cada Pesagem é registrada com a data da medição e o peso em quilogramas (kg), permitindo ao produtor acompanhar a curva de crescimento, calcular o Ganho Médio Diário (GMD) e identificar o ponto ideal de abate ou reprodução.
+
+* Saída do Rebanho (Vendas e Óbitos): O ciclo do animal na propriedade encerra-se de duas formas. Na operação comercial, o produtor realiza Vendas para frigoríficos ou outros pecuaristas, registrando a data da negociação, o comprador, o valor total da transação e vinculando todos os animais incluídos naquele lote comercializado. Por outro lado, caso ocorra alguma fatalidade na fazenda (como acidentes ofídicos, doenças ou complicações climáticas), o sistema permite o registro formal do Óbito vinculado exclusivamente àquele animal, documentando a data, o motivo da perda e as observações veterinárias para auditoria do rebanho.
 ## Regras de Negócio  
-1.Cada animal deve ser cadastrados individualmente com um brinco de identificação único.  
-2.Um animal pertence a único lote por vez (ex:" Lote Engorda 1", "Lote Matrizes"), mas um lote pode ter vários animais.  
-3.Um animal pode receber várias vacinas ao longo da vida, e uma mesma vacina pode ser aplicada em diversos animais.  
-4.Cada aplicação de vacina deve registrar a data e a dose aplicada.  
-5.Um animal passa por diversas pesagens para acompanhamento de desenvolvimento.  
-6.Cada animal deve ter seu status registrado(em criação, vendido ou óbito). Em caso de venda, devem-se registrar a data, o peso final e o valor da transação; em decorrência de óbito, devem-se registrar a data e o motivo da perda.
-## código do diagrama EER
-```sql
-CREATE DATABASE IF NOT EXISTS manejopecuario;
-USE manejopecuario;
+1. **Gestão de Pastagens:** A fazenda é dividida em pastos, cada um identificado por nome, tamanho em hectares e tipo de pastagem predominante.
+2. **Alocação de Lotes:** Um pasto pode comportar vários lotes ao longo do tempo, mas cada lote de manejo (ex.: *"Lote Desmama"*, *"Lote Boi Gordo"*) está alocado em apenas um pasto por vez, respeitando sua capacidade máxima.
+3. **Identificação Individual:** Cada animal deve ser cadastrado individualmente com um brinco de identificação único, informando data de nascimento, sexo (`M` ou `F`), raça e status atual (`Ativo`, `Vendido` ou `Morto`).
+4. **Pertencimento a Lote:** Todo animal pertence obrigatoriamente a um único lote por vez, enquanto um lote pode abrigar diversos animais.
+5. **Controle Sanitário (Vacinação):** Um animal pode receber várias aplicações de vacinas ao longo da vida, e uma mesma vacina do catálogo pode ser aplicada em diversos animais. Cada aplicação deve registrar a data e a dose em mililitros (`ml`).
+6. **Acompanhamento de Peso:** Um animal passa por diversas pesagens periódicas na balança para controle de desenvolvimento, registrando a data e o peso em quilogramas (`kg`) de cada medição.
+7. **Baixas por Venda ou Óbito:** Uma transação de venda pode englobar um ou vários animais (registrando data, comprador e valor total). Em caso de falecimento na propriedade, registra-se no máximo um óbito por animal, contendo a data, o motivo e a observação veterinária.
 
--- 1. Tabela PASTO
-CREATE TABLE IF NOT EXISTS pasto (
-    id_pasto INT AUTO_INCREMENT PRIMARY KEY,
-    nome_pasto VARCHAR(100) NOT NULL,
-    area_hectares DECIMAL(10,2),
-    tipo_capim VARCHAR(50)
-);
-
--- 2. Tabela LOTE (1:N com Pasto)
-CREATE TABLE IF NOT EXISTS lote (
-    id_lote INT AUTO_INCREMENT PRIMARY KEY,
-    nome_lote VARCHAR(100) NOT NULL,
-    capacidade_maxima INT,
-    id_pasto INT NOT NULL,
-    FOREIGN KEY (id_pasto) REFERENCES pasto(id_pasto)
-);
-
--- 3. Tabela VENDA
-CREATE TABLE IF NOT EXISTS venda (
-    id_venda INT AUTO_INCREMENT PRIMARY KEY,
-    data_venda DATE NOT NULL,
-    comprador VARCHAR(150),
-    valor_total DECIMAL(12,2)
-);
-
--- 4. Tabela ANIMAL (1:N com Lote e Venda)
-CREATE TABLE IF NOT EXISTS animal (
-    id_animal INT AUTO_INCREMENT PRIMARY KEY,
-    brinco_identificacao VARCHAR(50) NOT NULL UNIQUE,
-    data_nascimento DATE,
-    sexo CHAR(1),
-    raca VARCHAR(50),
-    status VARCHAR(20) DEFAULT 'Ativo',
-    id_lote INT NOT NULL,
-    id_venda INT NULL,
-    FOREIGN KEY (id_lote) REFERENCES lote(id_lote),
-    FOREIGN KEY (id_venda) REFERENCES venda(id_venda)
-);
-
--- 5. Tabela PESAGEM (1:N com Animal)
-CREATE TABLE IF NOT EXISTS pesagem (
-    id_pesagem INT AUTO_INCREMENT PRIMARY KEY,
-    data_pesagem DATE NOT NULL,
-    peso_kg DECIMAL(6,2) NOT NULL,
-    id_animal INT NOT NULL,
-    FOREIGN KEY (id_animal) REFERENCES animal(id_animal)
-);
-
--- 6. Tabela VACINA
-CREATE TABLE IF NOT EXISTS vacina (
-    id_vacina INT AUTO_INCREMENT PRIMARY KEY,
-    nome_vacina VARCHAR(100) NOT NULL,
-    fabricante VARCHAR(100),
-    periodo_validade_dias INT
-);
-
--- 7. Tabela APLICACAO_VACINA (N:N entre Animal e Vacina)
-CREATE TABLE IF NOT EXISTS aplicacao_vacina (
-    id_aplicacao INT AUTO_INCREMENT PRIMARY KEY,
-    data_aplicacao DATE NOT NULL,
-    dose_ml DECIMAL(5,2),
-    id_animal INT NOT NULL,
-    id_vacina INT NOT NULL,
-    FOREIGN KEY (id_animal) REFERENCES animal(id_animal),
-    FOREIGN KEY (id_vacina) REFERENCES vacina(id_vacina)
-);
-
--- 8. Tabela OBITO (1:1 com Animal)
-CREATE TABLE IF NOT EXISTS obito (
-    id_obito INT AUTO_INCREMENT PRIMARY KEY,
-    data_obito DATE NOT NULL,
-    motivo VARCHAR(255),
-    id_animal INT NOT NULL UNIQUE, -- UNIQUE garante a relação 1:1
-    FOREIGN KEY (id_animal) REFERENCES animal(id_animal)
-);
-
-## imagem do diagrama
-<img width="942" height="736" alt="Captura de tela 2026-11-03 114306" src="https://github.com/user-attachments/assets/5c4ca68b-5361-4a5f-8e01-13ad09cdd1db" />
+## Diagramas do Projeto
+* **Modelo Conceitual (DER):** <img width="1098" height="790" alt="manejopecuario drawio" src="https://github.com/user-attachments/assets/dbd41117-4ca1-4c9d-b8d8-232c9f1ef23b" />
+* **Modelo lógico/ físico (EER Workbench):** <img width="942" height="736" alt="Captura de tela 2026-11-03 114306" src="https://github.com/user-attachments/assets/5c4ca68b-5361-4a5f-8e01-13ad09cdd1db" />
+  
+## Scripts SQL 
+* **Estrutura do Banco(DDL):**
+* **Povoamento de Dados por Cenários (DML):** 
 
