@@ -24,7 +24,7 @@
 7. **Baixas por Venda ou Óbito:** Uma transação de venda pode englobar um ou vários animais (registrando data, comprador e valor total). Em caso de falecimento na propriedade, registra-se no máximo um óbito por animal, contendo a data, o motivo e a observação veterinária.
 
 ## Diagramas do Projeto
-* **Modelo Conceitual (DER):** 
+* **Modelo Conceitual (DER):** <img width="640" height="482" alt="image" src="https://github.com/user-attachments/assets/890a3b19-d8d3-43ff-b6ea-e5b6061a7684" /> 
 * **Modelo lógico/ físico (EER Workbench):** <img width="942" height="736" alt="Captura de tela 2026-11-03 114306" src="https://github.com/user-attachments/assets/5c4ca68b-5361-4a5f-8e01-13ad09cdd1db" />
   
 ## Scripts SQL 
