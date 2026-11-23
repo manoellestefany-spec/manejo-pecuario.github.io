@@ -86,12 +86,7 @@
     * `data_obito`
     * `motivo`
     * `id_animal` (FK - chave estrangeira)
-## 4. Diagrama Entidade e Relacionamento (DER) 
 
-
-
-
-<img width="640" height="482" alt="image" src="https://github.com/user-attachments/assets/890a3b19-d8d3-43ff-b6ea-e5b6061a7684" />
 
 
 
