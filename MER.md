@@ -45,7 +45,7 @@
   * `data_nascimento`
   * `sexo`
   * `raca`
-  * `status (ex:ativo/vendido/morto`
+  * `status_animal (ex:ativo/vendido/morto`
   * `id_lote` (FK - Chave Estrangeira)
   * `id_venda` (FK - Chave estrangeira referente a venda, nula enquanto o animal estiver na fazenda)
 
@@ -53,7 +53,6 @@
   * `id_lote` (PK - Chave Primária)
   * `nome_lote`
   * `capacidade_maxima`
-  * `pasto_localizacao`
   * `id_pasto` (FK - chave estrangeira referente a pasto)
 
 * **Vacina**
@@ -79,13 +78,14 @@
    * `id_venda` (PK - chave primaria)
    * `data_venda`
    * `comprador`
-   * `valor_total`
+   * `valor_total_transacao`
 
   * **Óbito**
-    * `id_obito` (PK - Chave estrangeira)
+    * `id_obito` (PK - Chave Primária)
     * `data_obito`
     * `motivo`
-    * `id_animal` (FK - chave estrangeira)
+    * `observacao_veterinaria`
+    * `id_animal` (FK - chave estrangeira/UNIQUE)
 
 
 
