@@ -26,11 +26,13 @@
 ## Diagramas do Projeto
 * **Modelo Conceitual (DER):** <img width="969" height="710" alt="Captura de tela 2026-11-24 085903" src="https://github.com/user-attachments/assets/0227adc9-0c6a-4b69-8403-49a070e6006d" />
 
-* **Modelo lógico/ físico (EER Workbench):** <img width="942" height="736" alt="Captura de tela 2026-11-03 114306" src="https://github.com/user-attachments/assets/5c4ca68b-5361-4a5f-8e01-13ad09cdd1db" />
+* **Modelo lógico/ físico (EER Workbench):** <img width="626" height="843" alt="Captura de tela 2026-11-24 093953" src="https://github.com/user-attachments/assets/eae62963-d3a0-4621-8b7f-d23acd10a0f1" />
+
   
 ## Scripts SQL 
-* **Estrutura do Banco(DDL):** [script DDL.sql](https://github.com/user-attachments/files/35293647/script.DDL.sql)
+* **Estrutura do Banco(DDL):**[script.ddl.sql](https://github.com/user-attachments/files/35331463/script.ddl.sql)
+ 
+* **Povoamento de Dados por Cenários (DML):** [script.dml.sql](https://github.com/user-attachments/files/35331488/script.dml.sql)
 
-* **Povoamento de Dados por Cenários (DML):** 
-[script DML.sql](https://github.com/user-attachments/files/35293931/script.DML.sql)
+
 
